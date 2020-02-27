@@ -13,7 +13,6 @@ import com.hiroshi.cimoc.parser.SearchIterator;
 import com.hiroshi.cimoc.soup.Node;
 import com.hiroshi.cimoc.utils.StringUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -39,7 +38,7 @@ public class gfmh extends MangaParser{
     }
 
     @Override
-    public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
+    public Request getSearchRequest(String keyword, int page) {
         String url = "";
         if(page == 1)
             url = StringUtils.format("https://m.gufengmh8.com/search/?keywords=%s", keyword);
@@ -75,7 +74,7 @@ public class gfmh extends MangaParser{
     }
 
     @Override
-    public void parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
+    public void parseInfo(String html, Comic comic) {
         Node body = new Node(html);
         String title = body.text(".view-sub.autoHeight > h1");
         String cover = body.src("#Cover mip-img");
@@ -118,10 +117,13 @@ public class gfmh extends MangaParser{
         if (!p.find()) return null;
         Matcher p1 = Pattern.compile("chapterPath = \"(.*?)\"").matcher(html);
         if (!p1.find()) return null;
+        Matcher p2 = Pattern.compile("pageImage = \"(.*?)\"").matcher(html);
+        if (!p2.find()) return null;
         String chapterPath = p1.group(1);
         String path[] = p.group(1).replaceAll("\"", "").split(",");
+        String domain = StringUtils.match("res\\.(.*?)\\.com",p2.group(1),1);
         for (int i = 1; i <= path.length; i++) {
-            list.add(new ImageUrl(i, "https://res.gufengmh8.com/"+chapterPath + path[i-1], false));
+            list.add(new ImageUrl(i, "https://res."+domain+".com/"+chapterPath + path[i-1], false));
         }
         return list;
     }

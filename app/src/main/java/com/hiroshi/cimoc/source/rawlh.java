@@ -18,7 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,10 +42,10 @@ public class rawlh extends MangaParser{
     }
 
     @Override
-    public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
+    public Request getSearchRequest(String keyword, int page) {
         String url = "";
         if (page!= 1) return null;
-        url = "https://lhscan.net/app/manga/controllers/search.single.php?q="+keyword;
+        url = "https://loveheaven.net/app/manga/controllers/search.single.php?q="+keyword;
         return new Request.Builder()
 //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;) Chrome/58.0.3029.110 Mobile")
                 .url(url)
@@ -85,12 +84,12 @@ public class rawlh extends MangaParser{
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "https://lhscan.net/".concat(cid);
+        String url = "https://loveheaven.net/".concat(cid);
         return new Request.Builder().url(url).build();
     }
 
     @Override
-    public void parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
+    public void parseInfo(String html, Comic comic) {
         Node body = new Node(html);
 //        String title = body.text("ul.manga-info > h1").replace("- Raw","").trim();
         String cover = body.src("div.well.info-cover > img");
@@ -99,7 +98,7 @@ public class rawlh extends MangaParser{
         }
 //        String update = body.text("#tab-chapper > div > ul > table > tbody > tr:nth-child(1) > td:nth-child(2) > i > time");
         String id = StringUtils.match("load_Comment\\((\\d+)\\)",html,1);
-        String p = post(new Request.Builder().url("https://lhscan.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
+        String p = post(new Request.Builder().url("https://loveheaven.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
         String title = StringUtils.match("Other Name:</strong> (.*?)</p>",p,1);
         if (title.contains("Updating")){
             title = body.text("ul.manga-info > h1").replace("- Raw","").trim();
@@ -129,7 +128,7 @@ public class rawlh extends MangaParser{
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("https://lhscan.net/%s", path);
+        String url = StringUtils.format("https://loveheaven.net/%s", path);
         return new Request.Builder().url(url).build();
     }
 
@@ -158,7 +157,7 @@ public class rawlh extends MangaParser{
     @Override
     public String parseCheck(String html) {
         String id = StringUtils.match("load_Comment\\((\\d+)\\)",html,1);
-        String p = post(new Request.Builder().url("https://lhscan.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
+        String p = post(new Request.Builder().url("https://loveheaven.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
         return StringUtils.match("(\\d{4}-\\d{2}-\\d{2})",p,1);
     }
 
@@ -176,7 +175,7 @@ public class rawlh extends MangaParser{
             String id = node.attr("img","onmouseenter");
             if (id!=null)
                 id = id.substring(5,id.length()-1);
-            String p = post(new Request.Builder().url("https://lhscan.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
+            String p = post(new Request.Builder().url("https://loveheaven.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
             String title = StringUtils.match("Other Name:</strong> (.*?)</p>",p,1);
             if (title.contains("Updating")){
                 title = node.attr("img","alt").replace("- Raw","").trim();
@@ -195,7 +194,7 @@ public class rawlh extends MangaParser{
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("https://lhscan.net/manga-list.html?listType=pagination&page=%%d&sort=%s&sort_type=DESC",
+            return StringUtils.format("https://loveheaven.net/manga-list.html?listType=pagination&page=%%d&sort=%s&sort_type=DESC",
                     args[CATEGORY_SUBJECT]);
         }
 
@@ -211,7 +210,7 @@ public class rawlh extends MangaParser{
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://lhscan.net");
+        return Headers.of("Referer", "https://loveheaven.net");
     }
 
     private static String post(Request request) {
