@@ -8,7 +8,6 @@ import com.hiroshi.cimoc.model.SourceDao;
 import com.hiroshi.cimoc.model.SourceDao.Properties;
 import com.hiroshi.cimoc.parser.Parser;
 import com.hiroshi.cimoc.source.BaiNian;
-import com.hiroshi.cimoc.source.Cartoonmad;
 import com.hiroshi.cimoc.source.ComicBus;
 import com.hiroshi.cimoc.source.Dmzj;
 import com.hiroshi.cimoc.source.EHentai;
@@ -17,9 +16,14 @@ import com.hiroshi.cimoc.source.IKanman;
 import com.hiroshi.cimoc.source.Locality;
 import com.hiroshi.cimoc.source.MH50;
 import com.hiroshi.cimoc.source.MHRen;
+import com.hiroshi.cimoc.source.MMmh;
 import com.hiroshi.cimoc.source.ManHuaDB;
 import com.hiroshi.cimoc.source.MangaDog;
+import com.hiroshi.cimoc.source.MangaRaw;
+import com.hiroshi.cimoc.source.Mangabz;
 import com.hiroshi.cimoc.source.Null;
+import com.hiroshi.cimoc.source.Onemh;
+import com.hiroshi.cimoc.source.Rawdevart;
 import com.hiroshi.cimoc.source.Tenmanga;
 import com.hiroshi.cimoc.source.gfmh;
 import com.hiroshi.cimoc.source.manganelo;
@@ -130,9 +134,6 @@ public class SourceManager {
                 case MHRen.TYPE:
                     parser = new MHRen(source);
                     break;
-                case Cartoonmad.TYPE:
-                    parser = new Cartoonmad(source);
-                    break;
                 case BaiNian.TYPE:
                     parser = new BaiNian(source);
                     break;
@@ -150,6 +151,21 @@ public class SourceManager {
                     break;
                 case xinxmh.TYPE:
                     parser = new xinxmh(source);
+                    break;
+                case MangaRaw.TYPE:
+                    parser = new MangaRaw(source);
+                    break;
+                case Rawdevart.TYPE:
+                    parser = new Rawdevart(source);
+                    break;
+                case Onemh.TYPE:
+                    parser = new Onemh(source);
+                    break;
+                case Mangabz.TYPE:
+                    parser = new Mangabz(source);
+                    break;
+                case MMmh.TYPE:
+                    parser = new MMmh(source);
                     break;
                     //testend
                 case Locality.TYPE:

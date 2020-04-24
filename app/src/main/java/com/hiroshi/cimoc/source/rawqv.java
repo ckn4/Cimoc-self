@@ -18,7 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,10 +42,10 @@ public class rawqv extends MangaParser{
         }
 
         @Override
-        public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
+        public Request getSearchRequest(String keyword, int page) {
             String url = "";
             if (page!= 1) return null;
-            url = "https://mangahato.com/app/manga/controllers/search.single.php?q="+keyword;
+            url = "https://kisslove.net/app/manga/controllers/search.single.php?q="+keyword;
             return new Request.Builder()
 //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;) Chrome/58.0.3029.110 Mobile")
                         .url(url)
@@ -67,7 +66,7 @@ public class rawqv extends MangaParser{
                                 String title = object.getString("primary").replace("- RAW", "").trim();
                                 String cover = object.getString("image").replace("\\","");
                                 if (cover.contains("/app/manga")) {
-                                    cover = "https://mangahato.com" + cover;
+                                    cover = "https://kisslove.net" + cover;
                                 } else if (cover.contains("farm1")||cover.contains("farm2")) {
                                     cover = "asset:///icon.png";
                                 }
@@ -87,22 +86,22 @@ public class rawqv extends MangaParser{
 
         @Override
         public Request getInfoRequest(String cid) {
-            String url = "https://mangahato.com/".concat(cid);
+            String url = "https://kisslove.net/".concat(cid);
             return new Request.Builder().url(url).build();
         }
 
         @Override
-        public void parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
+        public void parseInfo(String html, Comic comic) {
             Node body = new Node(html);
 //            String title = body.text("ul.manga-info > h1").replace("- RAW","").trim();
             String cover = body.src("div.well.info-cover > img");
             if (cover.contains("/app/manga")){
-                cover = "https://mangahato.com"+cover;
+                cover = "https://kisslove.net"+cover;
             }else if (cover.contains("farm1")||cover.contains("farm2")){
                 cover = "asset:///icon.png";
             }
             String id = StringUtils.match("load_Comment\\((\\d+)\\)",html,1);
-            String p = post(new Request.Builder().url("https://mangahato.com/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
+            String p = post(new Request.Builder().url("https://kisslove.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
             String title = StringUtils.match("Other name:</strong> (.*?)</p>",p,1);
             if (title.contains("Updating")){
                 title = body.text("ul.manga-info > h1").replace("- RAW","").trim();
@@ -132,7 +131,7 @@ public class rawqv extends MangaParser{
 
         @Override
         public Request getImagesRequest(String cid, String path) {
-            String url = StringUtils.format("https://mangahato.com/%s", path);
+            String url = StringUtils.format("https://kisslove.net/%s", path);
             return new Request.Builder().url(url).build();
         }
 
@@ -160,7 +159,7 @@ public class rawqv extends MangaParser{
     @Override
     public String parseCheck(String html) {
         String id = StringUtils.match("load_Comment\\((\\d+)\\)",html,1);
-        String p = post(new Request.Builder().url("https://mangahato.com/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
+        String p = post(new Request.Builder().url("https://kisslove.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
         return StringUtils.match("(\\d{4}-\\d{2}-\\d{2})",p,1);
     }
 
@@ -173,14 +172,14 @@ public class rawqv extends MangaParser{
 //            String title = node.attr("img","alt");
             String cover = node.src("img");
             if (cover.contains("/app/manga")){
-                cover = "https://mangahato.com"+cover;
+                cover = "https://kisslove.net"+cover;
             }else if (cover.contains("farm1")||cover.contains("farm2")){
                 cover = "asset:///icon.png";
             }
             String id = node.attr("img","onmouseenter");
             if (id!=null)
                 id = id.substring(5,id.length()-1);
-            String p = post(new Request.Builder().url("https://mangahato.com/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
+            String p = post(new Request.Builder().url("https://kisslove.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
             String title = StringUtils.match("Other name:</strong> (.*?)</p>",p,1);
             if (title.contains("Updating")){
                 title = node.attr("img","alt").replace("- RAW","").trim();
@@ -199,7 +198,7 @@ public class rawqv extends MangaParser{
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("https://mangahato.com/manga-list.html?listType=pagination&page=%%d&sort=%s&sort_type=DESC",
+            return StringUtils.format("https://kisslove.net/manga-list.html?listType=pagination&page=%%d&sort=%s&sort_type=DESC",
                     args[CATEGORY_SUBJECT]);
         }
 
@@ -215,7 +214,7 @@ public class rawqv extends MangaParser{
 
         @Override
         public Headers getHeader() {
-            return Headers.of("Referer", "https://mangahato.com");
+            return Headers.of("Referer", "https://kisslove.net");
         }
 
     private static String post(Request request) {
