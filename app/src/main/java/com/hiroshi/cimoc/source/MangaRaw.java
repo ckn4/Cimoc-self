@@ -2,31 +2,27 @@ package com.hiroshi.cimoc.source;
 
 import android.util.Pair;
 
-import com.hiroshi.cimoc.App;
 import com.hiroshi.cimoc.model.Chapter;
 import com.hiroshi.cimoc.model.Comic;
 import com.hiroshi.cimoc.model.ImageUrl;
 import com.hiroshi.cimoc.model.Source;
-import com.hiroshi.cimoc.parser.JsonIterator;
 import com.hiroshi.cimoc.parser.MangaCategory;
 import com.hiroshi.cimoc.parser.MangaParser;
+import com.hiroshi.cimoc.parser.NodeIterator;
 import com.hiroshi.cimoc.parser.SearchIterator;
 import com.hiroshi.cimoc.soup.Node;
 import com.hiroshi.cimoc.utils.StringUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import okhttp3.Headers;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 
 public class MangaRaw extends MangaParser{
 
@@ -42,88 +38,66 @@ public class MangaRaw extends MangaParser{
     }
 
     @Override
-    public Request getSearchRequest(String keyword, int page) {
+    public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         String url = "";
         if (page!= 1) return null;
-        url = "https://kisslove.net/app/manga/controllers/search.single.php?q="+keyword;
+        keyword = URLEncoder.encode(keyword,"UTF-8");
+        url = "http://manga1001.com/?s="+keyword;
         return new Request.Builder()
-//                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;) Chrome/58.0.3029.110 Mobile")
                 .url(url)
+//                .addHeader("user-agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
                 .build();
     }
 
     @Override
     public SearchIterator getSearchIterator(String html, int page, final String keyword) {
-        final String jsonString = StringUtils.match("\"data\":(.*)", html, 1);
-        if (jsonString!=null) {
-            try {
-                return new JsonIterator(new JSONArray(jsonString)) {
-                    @Override
-                    protected Comic parse(JSONObject object) {
-                        try {
-                            String cid = object.getString("onclick");
-                            cid = StringUtils.match("window.location='\\/(.*)'",cid,1);
-                            String title = object.getString("primary").replace("- RAW", "").trim();
-                            String cover = object.getString("image").replace("\\","");
-                            if (cover.contains("/app/manga")) {
-                                cover = "https://kisslove.net" + cover;
-                            } else if (cover.contains("farm1")||cover.contains("farm2")) {
-                                cover = "asset:///icon.png";
-                            }
-                            return new Comic(TYPE, cid, title, cover, null, null);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-                };
-            } catch (JSONException e) {
-                e.printStackTrace();
+        Node body = new Node(html);
+        return new NodeIterator(body.list("#main article")) {
+            @Override
+            protected Comic parse(Node node) {
+                String cid = node.hrefWithSubString("h3.entry-title > a",22);
+                cid = cid.substring(0,cid.length()-1);
+                String title = node.text("h3.entry-title > a");
+                if (title.contains("(Raw – Free)")){
+                    title = title.replace("(Raw – Free)","");
+                }
+                String cover = node.attr("img", "src");
+                cover = cover.replaceAll("https://","http://");
+                return new Comic(TYPE, cid, title, cover, null, null);
             }
-        }
-        return null;
+        };
     }
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "https://kisslove.net/".concat(cid);
+        String url = "http://manga1001.com/".concat(cid);
         return new Request.Builder().url(url).build();
     }
 
     @Override
     public void parseInfo(String html, Comic comic) {
         Node body = new Node(html);
-//            String title = body.text("ul.manga-info > h1").replace("- RAW","").trim();
-        String cover = body.src("div.well.info-cover > img");
-        if (cover.contains("/app/manga")){
-            cover = "https://kisslove.net"+cover;
-        }else if (cover.contains("farm1")||cover.contains("farm2")){
-            cover = "asset:///icon.png";
+        String cover = body.src(".entry-content img");
+        cover = cover.replaceAll("https://","http://");
+        String title = body.text(".entry-header > h1.entry-title");
+        if (title.contains("(Raw – Free)")){
+            title = title.replace("(Raw – Free)","");
         }
-        String id = StringUtils.match("load_Comment\\((\\d+)\\)",html,1);
-        String p = post(new Request.Builder().url("https://kisslove.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
-        String title = StringUtils.match("Other name:</strong> (.*?)</p>",p,1);
-        if (title.contains("Updating")){
-            title = body.text("ul.manga-info > h1").replace("- RAW","").trim();
-        }
-        if (title.contains(",")){
-            title = title.substring(0,title.indexOf(","));
-        }
-        String update = StringUtils.match("(\\d{4}-\\d{2}-\\d{2})",p,1);
+        String update = body.text(".chaplist p:eq(0)");
         String author = "";
-        String intro = "";
-        boolean status = isFinish(body.text("li:contains(Status) > a"));
+        String intro = body.text(".entry-content > p:eq(2)");
+        boolean status = false;
         comic.setInfo(title, cover, update, intro, author, status);
     }
 
     @Override
     public List<Chapter> parseChapter(String html) {
         List<Chapter> list = new LinkedList<>();
-        for (Node node : new Node(html).list("#tab-chapper > div > ul > table > tbody > tr")) {
-            String title = node.text("td > a > b");
-//                title = title.substring(title.length() - 3);
+        for (Node node : new Node(html).list(".chaplist a")) {
+            String title = node.text();
             title = Pattern.compile("[^0-9.]").matcher(title).replaceAll("");
-            String path = node.href("td > a");
+            String path = node.hrefWithSubString(22);
+            path = path.substring(0,path.length()-1);
             list.add(new Chapter(title, path));
         }
         return list;
@@ -131,7 +105,7 @@ public class MangaRaw extends MangaParser{
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("https://kisslove.net/%s", path);
+        String url = StringUtils.format("http://manga1001.com/%s", path);
         return new Request.Builder().url(url).build();
     }
 
@@ -139,14 +113,17 @@ public class MangaRaw extends MangaParser{
     @Override
     public List<ImageUrl> parseImages(String html) {
         List<ImageUrl> list = new LinkedList<>();
-        int i =0;
-        for (Node node : new Node(html).list(".chapter-img")) {
-            i = i + 1;
-            String src = node.attr("data-src").trim();
-            if (src.contains("farm1")||src.contains("farm2")) {
-                src = "asset:///icon.png";
-            }
-            list.add(new ImageUrl(i, src, false));
+        List<String> list1 = new ArrayList<>();
+        list1.add(StringUtils.match("class=\"aligncenter\" src=\"(.*?)\"",html,1));
+        Matcher mpage = Pattern.compile("data-src=\"(.*?)\"").matcher(html);
+        while (mpage.find()) {
+            list1.add(mpage.group(1));
+        }
+        for (int i = 0; i < list1.size(); ++i) {
+            String image = list1.get(i);
+//            if (image.contains("https://2.bp.blogspot.com"))
+//                image = image.replaceAll("https://2.bp.blogspot.com","https://4.bp.blogspot.com");
+            list.add(new ImageUrl(i + 1, image, false));
         }
         return list;
     }
@@ -158,37 +135,23 @@ public class MangaRaw extends MangaParser{
 
     @Override
     public String parseCheck(String html) {
-        String id = StringUtils.match("load_Comment\\((\\d+)\\)",html,1);
-        String p = post(new Request.Builder().url("https://kisslove.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
-        return StringUtils.match("(\\d{4}-\\d{2}-\\d{2})",p,1);
+        return new Node(html).text(".chaplist p:eq(0)");
     }
 
     @Override
     public List<Comic> parseCategory(String html, int page) {
         List<Comic> list = new ArrayList<>();
         Node body = new Node(html);
-        for (Node node : body.list("div.col-lg-6.col-md-12.row-list > .media > a.pull-left.link-list")) {
-            String cid = node.href();
-//            String title = node.attr("img","alt");
+        for (Node node : body.list("#main article")) {
+            String cid = node.hrefWithSubString("h3.entry-title > a",22);
+            cid = cid.substring(0,cid.length()-1);
             String cover = node.src("img");
-            if (cover.contains("/app/manga")){
-                cover = "https://kisslove.net"+cover;
-            }else if (cover.contains("farm1")||cover.contains("farm2")){
-                cover = "asset:///icon.png";
+            cover = cover.replaceAll("https://","http://");
+            String title = node.text(".entry-title > a");
+            if (title.contains("(Raw – Free)")){
+                title = title.replace("(Raw – Free)","");
             }
-            String id = node.attr("img","onmouseenter");
-            if (id!=null)
-                id = id.substring(5,id.length()-1);
-            String p = post(new Request.Builder().url("https://kisslove.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
-            String title = StringUtils.match("Other name:</strong> (.*?)</p>",p,1);
-            if (title.contains("Updating")){
-                title = node.attr("img","alt").replace("- RAW","").trim();
-            }
-            if (title.contains(",")){
-                title = title.substring(0,title.indexOf(","));
-            }
-            String update = StringUtils.match("(\\d{4}-\\d{2}-\\d{2})",p,1);
-            list.add(new Comic(TYPE, cid, title, cover, update, null));
+            list.add(new Comic(TYPE, cid, title, cover, null, null));
         }
         return list;
     }
@@ -198,15 +161,15 @@ public class MangaRaw extends MangaParser{
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("https://kisslove.net/manga-list.html?listType=pagination&page=%%d&sort=%s&sort_type=DESC",
+            return StringUtils.format("http://manga1001.com/%s/page/%%d/",
                     args[CATEGORY_SUBJECT]);
         }
 
         @Override
         protected List<Pair<String, String>> getSubject() {
             List<Pair<String, String>> list = new ArrayList<>();
-            list.add(Pair.create("更新", "last_update"));
-            list.add(Pair.create("热门", "views"));
+            list.add(Pair.create("更新", "newmanga"));
+            list.add(Pair.create("热门", ""));
             return list;
         }
 
@@ -214,39 +177,7 @@ public class MangaRaw extends MangaParser{
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://kisslove.net");
-    }
-
-    private static String post(Request request) {
-        return getResponseBody(App.getHttpClient(), request);
-    }
-
-    private static String getResponseBody(OkHttpClient client, Request request){
-        Response response = null;
-        int i = 0;
-        try {
-            response = client.newCall(request).execute();
-            if (response.isSuccessful()) {
-                return response.body().string();
-            }
-            else {
-                do {
-                    response = client.newCall(request).execute();
-                    i++;
-                }
-                while (!response.isSuccessful()&&i<3);
-                if (response.isSuccessful()) {
-                    return response.body().string();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-        }
-        return null;
+            return null;
     }
 
 }

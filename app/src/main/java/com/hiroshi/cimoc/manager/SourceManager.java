@@ -7,32 +7,20 @@ import com.hiroshi.cimoc.model.Source;
 import com.hiroshi.cimoc.model.SourceDao;
 import com.hiroshi.cimoc.model.SourceDao.Properties;
 import com.hiroshi.cimoc.parser.Parser;
-import com.hiroshi.cimoc.source.BaiNian;
 import com.hiroshi.cimoc.source.ComicBus;
 import com.hiroshi.cimoc.source.Dmzj;
 import com.hiroshi.cimoc.source.EHentai;
 import com.hiroshi.cimoc.source.HHSSEE;
-import com.hiroshi.cimoc.source.IKanman;
 import com.hiroshi.cimoc.source.Locality;
 import com.hiroshi.cimoc.source.MH50;
 import com.hiroshi.cimoc.source.MHRen;
-import com.hiroshi.cimoc.source.MMmh;
 import com.hiroshi.cimoc.source.ManHuaDB;
 import com.hiroshi.cimoc.source.MangaDog;
 import com.hiroshi.cimoc.source.MangaRaw;
-import com.hiroshi.cimoc.source.Mangabz;
 import com.hiroshi.cimoc.source.Null;
 import com.hiroshi.cimoc.source.Onemh;
-import com.hiroshi.cimoc.source.Rawdevart;
-import com.hiroshi.cimoc.source.Tenmanga;
-import com.hiroshi.cimoc.source.gfmh;
 import com.hiroshi.cimoc.source.manganelo;
-import com.hiroshi.cimoc.source.mkzhan;
 import com.hiroshi.cimoc.source.nhentai;
-import com.hiroshi.cimoc.source.rawlh;
-import com.hiroshi.cimoc.source.rawqq;
-import com.hiroshi.cimoc.source.rawqv;
-import com.hiroshi.cimoc.source.xinxmh;
 
 import java.util.List;
 
@@ -94,80 +82,42 @@ public class SourceManager {
         if (parser == null) {
             Source source = load(type);
             switch (type) {
-                case IKanman.TYPE:
-                    parser = new IKanman(source);
-                    break;
                 case Dmzj.TYPE:
                     parser = new Dmzj(source);
                     break;
                 case HHSSEE.TYPE:
                     parser = new HHSSEE(source);
                     break;
-                    //test
-                case rawqv.TYPE:
-                    parser = new rawqv(source);
-                    break;
-                case nhentai.TYPE:
-                    parser = new nhentai(source);
-                    break;
-                case MH50.TYPE:
-                    parser = new MH50(source);
-                    break;
-                case ManHuaDB.TYPE:
-                    parser = new ManHuaDB(source);
-                    break;
-                case rawlh.TYPE:
-                    parser = new rawlh(source);
-                    break;
-                case manganelo.TYPE:
-                    parser = new manganelo(source);
-                    break;
-                case mkzhan.TYPE:
-                    parser = new mkzhan(source);
-                    break;
-                case gfmh.TYPE:
-                    parser = new gfmh(source);
-                    break;
-                case Tenmanga.TYPE:
-                    parser = new Tenmanga(source);
+                case ComicBus.TYPE:
+                    parser = new ComicBus(source);
                     break;
                 case MHRen.TYPE:
                     parser = new MHRen(source);
                     break;
-                case BaiNian.TYPE:
-                    parser = new BaiNian(source);
-                    break;
-                case rawqq.TYPE:
-                    parser = new rawqq(source);
-                    break;
-                case ComicBus.TYPE:
-                    parser = new ComicBus(source);
-                    break;
-                case EHentai.TYPE:
-                    parser = new EHentai(source);
-                    break;
                 case MangaDog.TYPE:
                     parser = new MangaDog(source);
                     break;
-                case xinxmh.TYPE:
-                    parser = new xinxmh(source);
+                case ManHuaDB.TYPE:
+                    parser = new ManHuaDB(source);
                     break;
-                case MangaRaw.TYPE:
-                    parser = new MangaRaw(source);
-                    break;
-                case Rawdevart.TYPE:
-                    parser = new Rawdevart(source);
+                case MH50.TYPE:
+                    parser = new MH50(source);
                     break;
                 case Onemh.TYPE:
                     parser = new Onemh(source);
                     break;
-                case Mangabz.TYPE:
-                    parser = new Mangabz(source);
+                case MangaRaw.TYPE:
+                    parser = new MangaRaw(source);
                     break;
-                case MMmh.TYPE:
-                    parser = new MMmh(source);
+                case manganelo.TYPE:
+                    parser = new manganelo(source);
                     break;
-                    //testend
+                case nhentai.TYPE:
+                    parser = new nhentai(source);
+                    break;
+                case EHentai.TYPE:
+                    parser = new EHentai(source);
+                    break;
                 case Locality.TYPE:
                     parser = new Locality();
                     break;

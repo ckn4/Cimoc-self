@@ -9,11 +9,15 @@ android {
 
     defaultConfig {
         applicationId "com.hiroshi.cimoc"
-        minSdkVersion 15
+        minSdkVersion 26
         targetSdkVersion 28
-        versionCode 20
-        versionName "14.7"
+        versionCode 21
+        versionName "15"
         resConfigs "en", "zh"
+    }
+    lintOptions {
+        disable 'GoogleAppIndexingWarning'
+        baseline file("lint-baseline.xml")
     }
     buildTypes {
         release {
@@ -43,6 +47,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     compile 'org.greenrobot:greendao:3.2.2'
+    //noinspection GradleDependency
     compile 'com.squareup.okhttp3:okhttp:3.10.0'
     compile 'com.facebook.fresco:fresco:1.8.0'
     compile 'org.jsoup:jsoup:1.11.2'

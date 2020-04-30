@@ -1,19 +1,24 @@
 package com.hiroshi.cimoc.source;
 
+import android.util.Pair;
+
 import com.hiroshi.cimoc.model.Chapter;
 import com.hiroshi.cimoc.model.Comic;
 import com.hiroshi.cimoc.model.ImageUrl;
 import com.hiroshi.cimoc.model.Source;
+import com.hiroshi.cimoc.parser.MangaCategory;
 import com.hiroshi.cimoc.parser.MangaParser;
 import com.hiroshi.cimoc.parser.NodeIterator;
 import com.hiroshi.cimoc.parser.SearchIterator;
 import com.hiroshi.cimoc.soup.Node;
+import com.hiroshi.cimoc.utils.AESCryptUtil;
+import com.hiroshi.cimoc.utils.DecryptionUtils;
 import com.hiroshi.cimoc.utils.StringUtils;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import okhttp3.Headers;
 import okhttp3.Request;
@@ -23,8 +28,10 @@ public class Onemh extends MangaParser{
     public static final int TYPE = 36;
     public static final String DEFAULT_TITLE = "One漫画";
 
+    private String key = "JRUIFMVJDIWE569j";
+
     public Onemh(Source source) {
-        init(source, null);
+        init(source, new Category());
     }
 
     public static Source getDefaultSource() {
@@ -33,90 +40,55 @@ public class Onemh extends MangaParser{
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        String url = "";
-        if (keyword.startsWith("id===")){
             if (page == 1) {
-                keyword = keyword.replaceFirst("id===","");
-                url = StringUtils.format("https://www.mkzhan.com/%s/",keyword);
-                return new Request.Builder().url(url).build();
-            }
-            return null;
-        }else {
-            if (page == 1) {
-                url = "https://www.mkzhan.com/search/?keyword=" + keyword;
+                String url = StringUtils.format("https://www.onemanhua.com/search?searchString=%s",keyword);
                 return new Request.Builder()
-//                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;) Chrome/58.0.3029.110 Mobile")
                         .url(url)
                         .build();
             }
             return null;
-        }
     }
 
     @Override
     public SearchIterator getSearchIterator(String html, int page, final String keyword) {
-        final Node body = new Node(html);
-        if (body.text(".search_head")!=null&&body.text(".search_head").contains("很遗憾"))
-            return null;
-        else if (!body.list(".common-comic-item").isEmpty()){
-            return new NodeIterator(body.list(".common-comic-item")) {
-                @Override
-                protected Comic parse(Node node) {
-                    String cid = node.href("a");
-                    cid = cid.substring(1,cid.length()-1);
-                    String title = node.text(".comic__title > a");
-                    String cover = node.attr("img", "data-src");
-                    String update = "";
-                    String author = null;
-                    return new Comic(TYPE, cid, title, cover, update, author);
-                }
-            };
-        }
-        else return new NodeIterator(body.list(".de-info__box")) {
-                @Override
-                protected Comic parse(Node node) {
-                    try {
-                        ///214290/802364.html
-                        String cid = StringUtils.match("/(\\d+)/\\d+\\.html",body.href(".comic-handles > .btn--read"),1);
-                        String title = node.text("p");
-                        String cover = node.attr("img","data-src").trim();
-                        String author = node.text(".comic-author > .name > a");
-                        String update = "";
-                        return new Comic(TYPE, cid, title, cover, update, author);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-            };
+        Node body = new Node(html);
+        return new NodeIterator(body.list("dl.fed-deta-info")) {
+            @Override
+            protected Comic parse(Node node) {
+                String cid = node.hrefWithSubString("dd.fed-deta-content > h1 > a",1);
+                cid = cid.substring(0,cid.length()-1);
+                String title = node.text("dd.fed-deta-content > h1");
+                String cover = node.attr("dt.fed-deta-images > a","data-original").trim();
+                return new Comic(TYPE, cid, title, cover, null, null);
+            }
+        };
     }
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "https://www.mkzhan.com/".concat(cid);
+        String url = "https://www.onemanhua.com/".concat(cid);
         return new Request.Builder().url(url).build();
     }
 
     @Override
     public void parseInfo(String html, Comic comic) {
         Node body = new Node(html);
-        String title = body.text("body > div.de-info-wr > div.container--response > div > p");
-        String cover = body.attr("body > div.de-info-wr > div.container--response > div > div.de-info__cover > img","data-src");
-        String update = body.text("span.update-time").substring(0,10);
-        String author = body.text(".name > a");
-        String intro = body.text(".intro-total");
-        boolean status = isFinish(body.text("body > div.container--response.de-container-wr.clearfix > div.de-container > div.de-chapter > div.de-chapter__title > span"));
+        String title = body.text("dl.fed-deta-info > dd > h1");
+        String cover = body.attr("dl.fed-deta-info > dt > a","data-original");
+        String update = body.text("dl.fed-deta-info > dd li:contains(更新) > a");
+        String author = body.text("dl.fed-deta-info > dd li:contains(作者) > a");
+        String intro = body.text("dl.fed-deta-info > dd li:has(div) > div");
+        boolean status = isFinish(body.text("dl.fed-deta-info > dd > li:contains(状态) > a"));
         comic.setInfo(title, cover, update, intro, author, status);
     }
 
     @Override
     public List<Chapter> parseChapter(String html) {
         List<Chapter> list = new LinkedList<>();
-        for (Node node : new Node(html).list(".chapter__list.clearfix > ul > li")) {
+        for (Node node : new Node(html).list("div.fed-tabs-boxs div.fed-play-item.fed-drop-item.fed-visible > div.all_data_list li")) {
             String title = node.text("a");
-//                title = title.substring(title.length() - 3);
-//            title = Pattern.compile("[^0-9.]").matcher(title).replaceAll("");
-            String path = node.attr("a","data-hreflink");
+            String path = node.href("a");
+            path = path.replaceAll("/","---");
             list.add(new Chapter(title, path));
         }
         return list;
@@ -124,7 +96,8 @@ public class Onemh extends MangaParser{
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("https://www.mkzhan.com%s", path);
+        path = path.replaceAll("---","/");
+        String url = StringUtils.format("https://www.onemanhua.com%s", path);
         return new Request.Builder().url(url).build();
     }
 
@@ -132,13 +105,26 @@ public class Onemh extends MangaParser{
     @Override
     public List<ImageUrl> parseImages(String html) {
         List<ImageUrl> list = new LinkedList<>();
-//        https.*?page-\d+
-        Matcher mUrl = Pattern.compile("https.*?page-\\d+").matcher(html);
-        int i =0;
-        while(mUrl.find()){
-            list.add(new ImageUrl(++i, mUrl.group(), false));
-        }
 
+        String C_data = StringUtils.match("var C_DATA='(.*?)'",html,1);
+        String urls = "";
+        int num = 0;
+        try {
+            C_data = DecryptionUtils.base64Decrypt(C_data);
+            String direct_urls = AESCryptUtil.decrypt(C_data,key);
+//            String urls__direct = StringUtils.match("urls__direct:\"(.*?)\"",direct_urls,1);
+//            urls = DecryptionUtils.base64Decrypt(urls__direct);
+            urls = StringUtils.match("imgpath:\"(.*?)\"",direct_urls,1);
+            String Snum = StringUtils.match("totalimg:(.*?),",direct_urls,1);
+            if (Snum!=null)
+            num = Integer.parseInt(Snum);
+        }catch (IOException e){
+            return null;
+        }
+//        String[] url = urls.split("|SEPARATER|");
+        for (int i=1;i<=num;i++){
+            list.add(new ImageUrl(i, StringUtils.format("http://img.mljzmm.com/comic/%s%04d.jpg", urls, i), false));
+        }
         return list;
     }
 
@@ -149,12 +135,44 @@ public class Onemh extends MangaParser{
 
     @Override
     public String parseCheck(String html) {
-        return new Node(html).text("span.update-time").substring(0,10);
+        return new Node(html).text("dl.fed-deta-info > dd li:contains(更新) > a");
+    }
+
+    @Override
+    public List<Comic> parseCategory(String html, int page) {
+        List<Comic> list = new ArrayList<>();
+        Node body = new Node(html);
+        for (Node node : body.list("li.fed-list-item")) {
+            String cid = node.hrefWithSubString(".fed-list-title",1);
+            cid = cid.substring(0,cid.length()-1);
+            String title = node.text(".fed-list-title");
+            String cover = node.attr(".fed-list-pics ","data-original");
+            list.add(new Comic(TYPE, cid, title, cover, null, null));
+        }
+        return list;
+    }
+
+    private static class Category extends MangaCategory {
+
+
+        @Override
+        public String getFormat(String... args) {
+            return StringUtils.format("https://www.onemanhua.com/%s&page=%%d",args[CATEGORY_SUBJECT]);
+        }
+
+        @Override
+        protected List<Pair<String, String>> getSubject() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("更新", "show?orderBy=update"));
+            list.add(Pair.create("排行榜", "show?"));
+            return list;
+        }
+
     }
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://www.mkzhan.com");
+        return null;
     }
 
 

@@ -2,7 +2,7 @@ package com.hiroshi.cimoc.utils;
 
 import android.util.Base64;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -24,8 +24,7 @@ public class AESCryptUtil {
         while (sb.length() < 16) { sb.append("0"); }
         if (sb.length() > 16) { sb.setLength(16); }
 
-        try { data = sb.toString().getBytes("UTF-8");}
-        catch (UnsupportedEncodingException e) { e.printStackTrace(); }
+        data = sb.toString().getBytes(StandardCharsets.UTF_8);
 
         return new SecretKeySpec(data, "AES");
     }
@@ -41,8 +40,7 @@ public class AESCryptUtil {
         while (sb.length() < 16) { sb.append("0"); }
         if (sb.length() > 16) { sb.setLength(16); }
 
-        try { data = sb.toString().getBytes("UTF-8"); }
-        catch (UnsupportedEncodingException e) { e.printStackTrace(); }
+        data = sb.toString().getBytes(StandardCharsets.UTF_8);
 
         return new IvParameterSpec(data);
     }
@@ -55,7 +53,18 @@ public class AESCryptUtil {
             IvParameterSpec ivParameterSpec = createIV(iv);
             Cipher cipher = Cipher.getInstance(CipherMode);
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
-            return new String(cipher.doFinal(Base64.decode(content,Base64.DEFAULT)), "UTF-8");
+            return new String(cipher.doFinal(Base64.decode(content,Base64.DEFAULT)), StandardCharsets.UTF_8);
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public static String decrypt(String content, String key) {
+
+        try {
+            SecretKeySpec secretKeySpec = createKey(key);
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
+            return new String(cipher.doFinal(Base64.decode(content,Base64.DEFAULT)), StandardCharsets.UTF_8);
         } catch (Exception e) { e.printStackTrace(); }
         return null;
     }
