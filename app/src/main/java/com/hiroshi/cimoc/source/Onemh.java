@@ -146,7 +146,7 @@ public class Onemh extends MangaParser{
             String cid = node.hrefWithSubString(".fed-list-title",1);
             cid = cid.substring(0,cid.length()-1);
             String title = node.text(".fed-list-title");
-            String cover = node.attr(".fed-list-pics ","data-original");
+            String cover = node.attr(".fed-list-pics","data-original").trim();
             list.add(new Comic(TYPE, cid, title, cover, null, null));
         }
         return list;
