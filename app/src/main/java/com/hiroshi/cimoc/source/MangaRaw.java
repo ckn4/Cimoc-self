@@ -123,6 +123,8 @@ public class MangaRaw extends MangaParser{
             String image = list1.get(i);
 //            if (image.contains("https://2.bp.blogspot.com"))
 //                image = image.replaceAll("https://2.bp.blogspot.com","https://4.bp.blogspot.com");
+            if (image.contains("https://"))
+                image = image.replaceAll("https://","http://");
             list.add(new ImageUrl(i + 1, image, false));
         }
         return list;
@@ -177,7 +179,7 @@ public class MangaRaw extends MangaParser{
 
     @Override
     public Headers getHeader() {
-            return null;
+            return Headers.of("Referer","https://manga1001.com/","User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
     }
 
 }

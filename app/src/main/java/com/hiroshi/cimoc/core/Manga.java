@@ -7,8 +7,7 @@ import com.hiroshi.cimoc.model.Comic;
 import com.hiroshi.cimoc.model.ImageUrl;
 import com.hiroshi.cimoc.parser.Parser;
 import com.hiroshi.cimoc.parser.SearchIterator;
-
-import org.json.JSONArray;
+import com.hiroshi.cimoc.soup.Node;
 
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
@@ -223,20 +222,18 @@ public class Manga {
             @Override
             public void call(Subscriber<? super List<String>> subscriber) {
                 RequestBody body = new FormBody.Builder()
-                        .add("key", keyword)
+                        .add("t", keyword)
                         .add("user-agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36")
                         .build();
                 Request request = new Request.Builder()
-                        .url("https://www.manhuagui.com/tools/word.ashx")
+                        .url("http://www.dm5.com/search.ashx")
                         .post(body)
                         .build();
                 try {
-                    String jsonString = getResponseBody(App.getHttpClient(), request, null);
-                    JSONArray array = new JSONArray(jsonString);
+                    Node html = new Node(getResponseBody(App.getHttpClient(), request, null));
                     List<String> list = new ArrayList<>();
-                    for (int i = 0; i != array.length(); ++i) {
-                        list.add(array.getJSONObject(i).getString("t"));
-                    }
+                    for (Node node:html.list("span.left"))
+                        list.add(node.text());
                     subscriber.onNext(list);
                     subscriber.onCompleted();
                 } catch (Exception e) {
