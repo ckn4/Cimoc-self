@@ -41,7 +41,7 @@ public class Onemh extends MangaParser{
     @Override
     public Request getSearchRequest(String keyword, int page) {
             if (page == 1) {
-                String url = StringUtils.format("https://www.onemanhua.com/search?searchString=%s",keyword);
+                String url = StringUtils.format("https://www.ohmanhua.com/search?searchString=%s",keyword);
                 return new Request.Builder()
                         .url(url)
                         .build();
@@ -66,7 +66,7 @@ public class Onemh extends MangaParser{
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "https://www.onemanhua.com/".concat(cid);
+        String url = "https://www.ohmanhua.com/".concat(cid);
         return new Request.Builder().url(url).build();
     }
 
@@ -97,7 +97,7 @@ public class Onemh extends MangaParser{
     @Override
     public Request getImagesRequest(String cid, String path) {
         path = path.replaceAll("---","/");
-        String url = StringUtils.format("https://www.onemanhua.com%s", path);
+        String url = StringUtils.format("https://www.ohmanhua.com%s", path);
         return new Request.Builder().url(url).build();
     }
 
@@ -157,7 +157,7 @@ public class Onemh extends MangaParser{
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("https://www.onemanhua.com/%s&page=%%d",args[CATEGORY_SUBJECT]);
+            return StringUtils.format("https://www.ohmanhua.com/%s&page=%%d",args[CATEGORY_SUBJECT]);
         }
 
         @Override
