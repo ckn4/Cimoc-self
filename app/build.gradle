@@ -11,8 +11,8 @@ android {
         applicationId "com.hiroshi.cimoc"
         minSdkVersion 26
         targetSdkVersion 28
-        versionCode 22
-        versionName "15.1"
+        versionCode 23
+        versionName "15.2"
         resConfigs "en", "zh"
     }
     lintOptions {
