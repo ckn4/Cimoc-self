@@ -42,7 +42,7 @@ public class MangaRaw extends MangaParser{
         String url = "";
         if (page!= 1) return null;
         keyword = URLEncoder.encode(keyword,"UTF-8");
-        url = "http://manga1001.com/?s="+keyword;
+        url = "http://manga1000.com/?s="+keyword;
         return new Request.Builder()
                 .url(url)
 //                .addHeader("user-agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
@@ -70,7 +70,7 @@ public class MangaRaw extends MangaParser{
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "http://manga1001.com/".concat(cid);
+        String url = "http://manga1000.com/".concat(cid);
         return new Request.Builder().url(url).build();
     }
 
@@ -105,7 +105,7 @@ public class MangaRaw extends MangaParser{
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("http://manga1001.com/%s", path);
+        String url = StringUtils.format("http://manga1000.com/%s", path);
         return new Request.Builder().url(url).build();
     }
 
@@ -163,7 +163,7 @@ public class MangaRaw extends MangaParser{
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("http://manga1001.com/%s/page/%%d/",
+            return StringUtils.format("http://manga1000.com/%s/page/%%d/",
                     args[CATEGORY_SUBJECT]);
         }
 
@@ -179,7 +179,7 @@ public class MangaRaw extends MangaParser{
 
     @Override
     public Headers getHeader() {
-            return Headers.of("Referer","https://manga1001.com/","User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
+            return Headers.of("Referer","https://manga1000.com/","User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
     }
 
 }
