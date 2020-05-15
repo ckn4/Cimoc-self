@@ -13,7 +13,6 @@ import com.hiroshi.cimoc.parser.SearchIterator;
 import com.hiroshi.cimoc.soup.Node;
 import com.hiroshi.cimoc.utils.StringUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,9 +36,9 @@ public class manganelo extends MangaParser{
     }
 
     @Override
-    public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
+    public Request getSearchRequest(String keyword, int page) {
         keyword = keyword.replace(" ","_");
-        String url = StringUtils.format("https://m.manganelo.com/search/%s?page=%d", keyword,page);
+        String url = StringUtils.format("https://manganelo.com/search/%s?page=%d", keyword,page);
         return new Request.Builder()
                 .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
                 .url(url)
@@ -53,7 +52,7 @@ public class manganelo extends MangaParser{
             @Override
             protected Comic parse(Node node) {
                 String cid = node.href("a");
-                if (cid.contains("m.manganelo"))cid = cid.substring(24);
+                if (cid.contains("manganelo"))cid = cid.substring(28);
                 else cid = cid.substring(27);
                 String title = node.attr("a img","alt");
                 String cover = node.src("a img");
@@ -67,12 +66,12 @@ public class manganelo extends MangaParser{
     @Override
     public Request getInfoRequest(String cid) {
         _cid = cid;
-        cid = "https://chap.manganelo.com/"+cid;
+        cid = "https://manganelo.com/manga/"+cid;
         return new Request.Builder().url(cid).build();
     }
 
     @Override
-    public void parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
+    public void parseInfo(String html, Comic comic) {
         Node body = new Node(html);
         String title = body.text(".story-info-right h1");
         String cover = body.src(".story-info-left img");
@@ -94,7 +93,7 @@ public class manganelo extends MangaParser{
             if (title==null){
                 title = node.text("a");
             }
-            int length = 27+_cid.length()+1;
+            int length = 30+_cid.length()+1;
             String path = node.href("a").substring(length);
             list.add(new Chapter(title, path));
         }
@@ -103,7 +102,7 @@ public class manganelo extends MangaParser{
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        path = "https://chap.manganelo.com/"+_cid+"/"+path;
+        path = "https://manganelo.com/chapter/"+_cid+"/"+path;
         return new Request.Builder().url(path).build();
     }
 
@@ -139,7 +138,7 @@ public class manganelo extends MangaParser{
         Node body = new Node(html);
         for (Node node : body.list(".content-genres-item")) {
             String cid = node.href("a");
-            if (cid.contains("m.manganelo"))cid = cid.substring(24);
+            if (cid.contains("manganelo"))cid = cid.substring(28);
             else cid = cid.substring(27);
             String title = node.attr("a","title");
             String cover = node.src("a > img");
@@ -153,7 +152,7 @@ public class manganelo extends MangaParser{
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("https://m.manganelo.com/genre-all?type=%s&category=all&state=all&page=%%d",
+            return StringUtils.format("https://manganelo.com/genre-all?type=%s&category=all&state=all&page=%%d",
                     args[CATEGORY_SUBJECT]);
         }
 
@@ -170,7 +169,7 @@ public class manganelo extends MangaParser{
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://m.manganelo.com");
+        return Headers.of("Referer", "https://manganelo.com");
     }
 
 

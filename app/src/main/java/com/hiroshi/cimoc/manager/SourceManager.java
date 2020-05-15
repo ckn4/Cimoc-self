@@ -10,6 +10,7 @@ import com.hiroshi.cimoc.parser.Parser;
 import com.hiroshi.cimoc.source.ComicBus;
 import com.hiroshi.cimoc.source.Dmzj;
 import com.hiroshi.cimoc.source.EHentai;
+import com.hiroshi.cimoc.source.Erocool;
 import com.hiroshi.cimoc.source.HHSSEE;
 import com.hiroshi.cimoc.source.Locality;
 import com.hiroshi.cimoc.source.MH50;
@@ -20,7 +21,6 @@ import com.hiroshi.cimoc.source.MangaRaw;
 import com.hiroshi.cimoc.source.Null;
 import com.hiroshi.cimoc.source.Onemh;
 import com.hiroshi.cimoc.source.manganelo;
-import com.hiroshi.cimoc.source.nhentai;
 
 import java.util.List;
 
@@ -112,8 +112,8 @@ public class SourceManager {
                 case manganelo.TYPE:
                     parser = new manganelo(source);
                     break;
-                case nhentai.TYPE:
-                    parser = new nhentai(source);
+                case Erocool.TYPE:
+                    parser = new Erocool(source);
                     break;
                 case EHentai.TYPE:
                     parser = new EHentai(source);

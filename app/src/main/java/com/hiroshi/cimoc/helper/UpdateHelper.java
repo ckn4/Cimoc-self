@@ -6,6 +6,7 @@ import com.hiroshi.cimoc.model.Source;
 import com.hiroshi.cimoc.source.ComicBus;
 import com.hiroshi.cimoc.source.Dmzj;
 import com.hiroshi.cimoc.source.EHentai;
+import com.hiroshi.cimoc.source.Erocool;
 import com.hiroshi.cimoc.source.HHSSEE;
 import com.hiroshi.cimoc.source.MH50;
 import com.hiroshi.cimoc.source.MHRen;
@@ -14,7 +15,6 @@ import com.hiroshi.cimoc.source.MangaDog;
 import com.hiroshi.cimoc.source.MangaRaw;
 import com.hiroshi.cimoc.source.Onemh;
 import com.hiroshi.cimoc.source.manganelo;
-import com.hiroshi.cimoc.source.nhentai;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +25,20 @@ import java.util.List;
 
 public class UpdateHelper {
 
-    private static final int VERSION = 151;
+    private static final int VERSION = 153;
 
     public static void update(PreferenceManager manager, final DaoSession session) {
         int version = manager.getInt(PreferenceManager.PREF_APP_VERSION, 0);
         //之前版本version默认为1，新安装version默认为0
         if (version != VERSION) {
-            initSource(session);
+            switch (version) {
+                case 0:
+                    initSource(session);
+                    break;
+                case 151:
+                    session.getSourceDao().insert(Erocool.getDefaultSource());
+                    session.getDatabase().execSQL("DELETE FROM SOURCE WHERE \"TYPE\" = 61");
+            }
             manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
         }
     }
@@ -51,7 +58,7 @@ public class UpdateHelper {
         list.add(Onemh.getDefaultSource());
         list.add(MangaRaw.getDefaultSource());
         list.add(manganelo.getDefaultSource());
-        list.add(nhentai.getDefaultSource());
+        list.add(Erocool.getDefaultSource());
         list.add(EHentai.getDefaultSource());
         session.getSourceDao().insertOrReplaceInTx(list);
     }
