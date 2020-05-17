@@ -17,10 +17,10 @@ import com.hiroshi.cimoc.source.MH50;
 import com.hiroshi.cimoc.source.MHRen;
 import com.hiroshi.cimoc.source.ManHuaDB;
 import com.hiroshi.cimoc.source.MangaDog;
-import com.hiroshi.cimoc.source.MangaRaw;
 import com.hiroshi.cimoc.source.Null;
 import com.hiroshi.cimoc.source.Onemh;
 import com.hiroshi.cimoc.source.manganelo;
+import com.hiroshi.cimoc.source.rawlh;
 
 import java.util.List;
 
@@ -106,8 +106,8 @@ public class SourceManager {
                 case Onemh.TYPE:
                     parser = new Onemh(source);
                     break;
-                case MangaRaw.TYPE:
-                    parser = new MangaRaw(source);
+                case rawlh.TYPE:
+                    parser = new rawlh(source);
                     break;
                 case manganelo.TYPE:
                     parser = new manganelo(source);
