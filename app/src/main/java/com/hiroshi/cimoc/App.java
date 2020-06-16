@@ -22,7 +22,10 @@ import com.hiroshi.cimoc.ui.adapter.GridAdapter;
 import com.hiroshi.cimoc.utils.DocumentUtils;
 import com.hiroshi.cimoc.utils.StringUtils;
 
+import org.conscrypt.Conscrypt;
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
+
+import java.security.Security;
 
 import okhttp3.OkHttpClient;
 
@@ -58,6 +61,10 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         UpdateHelper.update(mPreferenceManager, getDaoSession());
         Fresco.initialize(this);
         initPixels();
+        // TLS 1.3 support for Android 10 and below
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            Security.insertProviderAt(Conscrypt.newProvider(), 1);
+        }
     }
 
     @Override

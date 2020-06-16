@@ -7,33 +7,31 @@ import com.hiroshi.cimoc.model.Chapter;
 import com.hiroshi.cimoc.model.Comic;
 import com.hiroshi.cimoc.model.ImageUrl;
 import com.hiroshi.cimoc.model.Source;
-import com.hiroshi.cimoc.parser.JsonIterator;
 import com.hiroshi.cimoc.parser.MangaCategory;
 import com.hiroshi.cimoc.parser.MangaParser;
+import com.hiroshi.cimoc.parser.NodeIterator;
 import com.hiroshi.cimoc.parser.SearchIterator;
 import com.hiroshi.cimoc.soup.Node;
 import com.hiroshi.cimoc.utils.StringUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class rawlh extends MangaParser{
+public class rawqq extends MangaParser{
 
-    public static final int TYPE = 41;
-    public static final String DEFAULT_TITLE = "Rawlh";
+    public static final int TYPE = 42;
+    public static final String DEFAULT_TITLE = "Rawqq";
 
-    public rawlh(Source source) {
+    public rawqq(Source source) {
         init(source, new Category());
     }
 
@@ -45,45 +43,34 @@ public class rawlh extends MangaParser{
     public Request getSearchRequest(String keyword, int page) {
         String url = "";
         if (page!= 1) return null;
-        url = "https://loveheaven.net/app/manga/controllers/search.single.php?q="+keyword;
+        RequestBody body = new FormBody.Builder()
+                .add("query", keyword)
+                .build();
+        url = "https://hanascan.com/ender.php";
         return new Request.Builder()
                 .url(url)
+                .post(body)
                 .build();
     }
 
     @Override
     public SearchIterator getSearchIterator(String html, int page, final String keyword) {
-        final String jsonString = StringUtils.match("\"data\":(.*)", html, 1);
-        if (jsonString!=null) {
-            try {
-                return new JsonIterator(new JSONArray(jsonString)) {
-                    @Override
-                    protected Comic parse(JSONObject object) {
-                        try {
-                            String cid = object.getString("onclick");
-                            cid = StringUtils.match("window.location='\\/(.*)'",cid,1);
-                            String title = object.getString("primary").replace(" - Raw", "").trim();
-                            String cover = object.getString("image").replace("\\","");
-                            if (cover.contains("farm1")||cover.contains("farm2")) {
-                                cover = "asset:///icon.png";
-                            }
-                            return new Comic(TYPE, cid, title, cover, null, null);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-                };
-            } catch (JSONException e) {
-                e.printStackTrace();
+        Node body = new Node(html);
+        return new NodeIterator(body.list("#suggestsearchz > ul")) {
+            @Override
+            protected Comic parse(Node node) {
+                String cid = node.href("a").substring(21);
+                String title = node.attr("a", "title").replace(" - Raw", "").trim();
+                String cover = node.src("img").trim();
+                String author = null;
+                return new Comic(TYPE, cid, title, cover, null, author);
             }
-        }
-        return null;
+        };
     }
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "https://loveheaven.net/".concat(cid);
+        String url = "https://hanascan.com/".concat(cid);
         return new Request.Builder().url(url).build();
     }
 
@@ -91,9 +78,6 @@ public class rawlh extends MangaParser{
     public void parseInfo(String html, Comic comic) {
         Node body = new Node(html);
         String cover = body.src("div.well.info-cover > img");
-        if (cover.contains("farm1")||cover.contains("farm2")){
-            cover = "asset:///icon.png";
-        }
         String title = body.text("ul.manga-info > li:contains(Other names)");
         if (title.contains("Updating")||title.isEmpty()){
             title = body.text("ul.manga-info > h1").replace(" - RAW","").trim();
@@ -102,7 +86,7 @@ public class rawlh extends MangaParser{
         if (title.contains(",")){
             title = title.substring(0,title.indexOf(","));
         }
-        String update = body.getChild("#tab-chapper > div > ul > table > tbody > tr td > a > b").text();
+        String update = body.getChild("#tab-chapper > div a.chapter").text();
         update = Pattern.compile("[^0-9.]").matcher(update).replaceAll("");
         String author = "";
         String intro = "";
@@ -113,11 +97,10 @@ public class rawlh extends MangaParser{
     @Override
     public List<Chapter> parseChapter(String html) {
         List<Chapter> list = new LinkedList<>();
-        for (Node node : new Node(html).list("#tab-chapper > div > ul > table > tbody > tr")) {
-            String title = node.text("td > a > b");
-//                title = title.substring(title.length() - 3);
+        for (Node node : new Node(html).list("#tab-chapper > div > p")) {
+            String title = node.text(".title > a > b");
             title = Pattern.compile("[^0-9.]").matcher(title).replaceAll("");
-            String path = node.href("td > a");
+            String path = node.href(".title > a");
             list.add(new Chapter(title, path));
         }
         return list;
@@ -125,7 +108,7 @@ public class rawlh extends MangaParser{
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("https://loveheaven.net/%s", path);
+        String url = StringUtils.format("https://hanascan.com/%s", path);
         return new Request.Builder().url(url).build();
     }
 
@@ -134,13 +117,9 @@ public class rawlh extends MangaParser{
     public List<ImageUrl> parseImages(String html) {
         List<ImageUrl> list = new LinkedList<>();
         int i =0;
-        for (Node node : new Node(html).list("img.chapter-img")) {
+        for (Node node : new Node(html).list("#content > img")) {
             i = i + 1;
-//            String src = node.attr("data-original").trim();
-            String src = node.attr("data-src").trim();
-            if (src.contains("farm1")||src.contains("farm2")) {
-                src = "asset:///icon.png";
-            }
+            String src = node.src();
             list.add(new ImageUrl(i, src, false));
         }
         return list;
@@ -153,7 +132,7 @@ public class rawlh extends MangaParser{
 
     @Override
     public String parseCheck(String html) {
-        String update = new Node(html).getChild("#tab-chapper > div > ul > table > tbody > tr td > a > b").text();
+        String update = new Node(html).getChild("#tab-chapper > div a.chapter").text();
         return Pattern.compile("[^0-9.]").matcher(update).replaceAll("");
     }
 
@@ -163,22 +142,23 @@ public class rawlh extends MangaParser{
         Node body = new Node(html);
         for (Node node : body.list("div.col-lg-12.col-md-12.row-list > .media > a.pull-left.link-list")) {
             String cid = node.href();
-            String cover = node.attr("img","data-src").trim();
+            String cover = node.attr("img","data-original").trim();
             if (cover.contains("farm1")||cover.contains("farm2")){
                 cover = "asset:///icon.png";
             }
             String id = node.attr("img","onmouseenter");
             if (id!=null)
                 id = id.substring(5,id.length()-1);
-            String p = post(new Request.Builder().url("https://loveheaven.net/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
-            String title = StringUtils.match("Other Name:</strong> (.*?)</p>",p,1);
+            String p = post(new Request.Builder().url("https://hanascan.com/app/manga/controllers/cont.pop.php?action=pop&id="+id).build());
+            String title = StringUtils.match("Other name:</strong> (.*?)</p>",p,1);
             if (title.contains("Updating")){
                 title = node.attr("img","alt").replace("- Raw","").trim();
             }
             if (title.contains(",")){
                 title = title.substring(0,title.indexOf(","));
             }
-            list.add(new Comic(TYPE, cid, title, cover, null, null));
+            String update = StringUtils.match("(\\d{4}-\\d{2}-\\d{2})",p,1);
+            list.add(new Comic(TYPE, cid, title, cover, update, null));
         }
         return list;
     }
@@ -188,7 +168,7 @@ public class rawlh extends MangaParser{
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("https://loveheaven.net/manga-list.html?listType=pagination&page=%%d&sort=%s&sort_type=DESC",
+            return StringUtils.format("https://hanascan.com/manga-list.html?listType=pagination&page=%%d&sort=%s&sort_type=DESC",
                     args[CATEGORY_SUBJECT]);
         }
 
@@ -204,7 +184,7 @@ public class rawlh extends MangaParser{
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://loveheaven.net");
+        return null;
     }
 
     private static String post(Request request) {
@@ -238,5 +218,5 @@ public class rawlh extends MangaParser{
         }
         return null;
     }
-}
 
+}
