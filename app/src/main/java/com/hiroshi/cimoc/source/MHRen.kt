@@ -25,7 +25,7 @@ import java.util.*
 class MHRen(source: Source) : MangaParser() {
 
     private fun myGet(url: HttpUrl): Request {
-        val now = StringUtils.getFormatTime("yyyy-MM-dd+HH:mm:ss", System.currentTimeMillis());
+        val now = StringUtils.getFormatTime("yyyy-MM-dd+HH:mm:ss", System.currentTimeMillis())
         val real_url = url.newBuilder()
                 .setQueryParameter("gsm", "md5")
                 .setQueryParameter("gft", "json")
@@ -98,8 +98,8 @@ class MHRen(source: Source) : MangaParser() {
 
     override fun getSearchIterator(html: String, page: Int, keyword: String): SearchIterator? {
         try {
-            val re = StringUtils.match("\"result\": (\\[[\\s\\S]*\\])",html,1);
-            val re2 = StringUtils.match("\"mangas\": (\\[[\\s\\S]*\\])",html,1);
+            val re = StringUtils.match("\"result\": (\\[[\\s\\S]*\\])",html,1)
+            val re2 = StringUtils.match("\"mangas\": (\\[[\\s\\S]*\\])",html,1)
             if (re!=null) {
                 return object : JsonIterator(JSONArray(re)) {
                     override fun parse(`object`: JSONObject): Comic? {
@@ -144,7 +144,7 @@ class MHRen(source: Source) : MangaParser() {
 
     override fun getInfoRequest(cid: String): Request {
         val url = HttpUrl.parse(baseUrl+"/v1/manga/getDetail?mangaId=$cid")!!
-        return myGet(url);
+        return myGet(url)
     }
 
     override fun parseInfo(html: String, comic: Comic) {
@@ -190,11 +190,11 @@ class MHRen(source: Source) : MangaParser() {
             for (i in 0 until array.length()) {
                 val obj1 = array.getJSONObject(i)
                 var title = obj1.getString("sectionName")
-                var subtitle = obj1.getString("sectionTitle")
-                if (subtitle!=null){
+                val subtitle = obj1.getString("sectionTitle")
+                if (subtitle!=""){
                     title = title+" "+subtitle
                 }
-                if(obj1.getString("isMustPay")=="1") title = "🔒"+title;
+                if(obj1.getString("isMustPay")=="1") title = "🔒"+title
                 val path = "/v1/manga/getRead?mangaSectionId=${obj1.getInt("sectionId")}"
                 list.add(Chapter(title, path))
                 }
@@ -249,7 +249,7 @@ class MHRen(source: Source) : MangaParser() {
 
     override fun parseCheck(html: String): String? {
         val obj = JSONObject(html).getJSONObject("response")
-        var update = obj.getString("mangaNewestTime")
+        val update = obj.getString("mangaNewestTime")
         return StringUtils.match("(\\d+-\\d+-\\d+)",update,1)
     }
 

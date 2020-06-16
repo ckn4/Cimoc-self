@@ -114,16 +114,17 @@ public class Onemh extends MangaParser{
             String direct_urls = AESCryptUtil.decrypt(C_data,key);
 //            String urls__direct = StringUtils.match("urls__direct:\"(.*?)\"",direct_urls,1);
 //            urls = DecryptionUtils.base64Decrypt(urls__direct);
+            String domain = StringUtils.match("domain:\"(.*?)\"",direct_urls,1);
             urls = StringUtils.match("imgpath:\"(.*?)\"",direct_urls,1);
             String Snum = StringUtils.match("totalimg:(.*?),",direct_urls,1);
             if (Snum!=null)
             num = Integer.parseInt(Snum);
-        }catch (IOException e){
-            return null;
-        }
 //        String[] url = urls.split("|SEPARATER|");
         for (int i=1;i<=num;i++){
-            list.add(new ImageUrl(i, StringUtils.format("http://img.mljzmm.com/comic/%s%04d.jpg", urls, i), false));
+            list.add(new ImageUrl(i, "http://" + domain + StringUtils.format("/comic/%s%04d.jpg", urls, i), false));
+        }
+        }catch (IOException e){
+            return null;
         }
         return list;
     }
