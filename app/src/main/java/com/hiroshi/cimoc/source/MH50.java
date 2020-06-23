@@ -44,7 +44,7 @@ public class MH50 extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) {
         if (page == 1) {
-            String url = StringUtils.format("https://m.manhuadui.com/search/?keywords=%s&page=%d", keyword, page);
+            String url = StringUtils.format("https://m.manhuabei.com/search/?keywords=%s&page=%d", keyword, page);
             return new Request.Builder()
                     .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/12.0 Mobile/15A372 Safari/604.1")
                     .url(url)
@@ -80,7 +80,7 @@ public class MH50 extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = StringUtils.format("https://m.manhuadui.com/manhua/%s/", cid);
+        String url = StringUtils.format("https://m.manhuabei.com/manhua/%s/", cid);
         return new Request.Builder()
                 .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/12.0 Mobile/15A372 Safari/604.1")
                 .url(url)
@@ -160,7 +160,7 @@ public class MH50 extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("https://m.manhuadui.com/manhua/%s/%s", cid, path);
+        String url = StringUtils.format("https://m.manhuabei.com/manhua/%s/%s", cid, path);
         return new Request.Builder()
                 .url(url)
                 .build();
@@ -256,8 +256,7 @@ public class MH50 extends MangaParser {
 
         @Override
         public String getFormat(String... args) {
-            //https://www.manhuadui.com/update/$page/
-            return StringUtils.format("https://m.manhuadui.com/%s/?page=%%d",args[CATEGORY_SUBJECT]);
+            return StringUtils.format("https://m.manhuabei.com/%s/?page=%%d",args[CATEGORY_SUBJECT]);
         }
 
         @Override
@@ -279,7 +278,7 @@ public class MH50 extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://m.manhuadui.com/");
+        return Headers.of("Referer", "https://m.manhuabei.com/");
     }
 
 }
