@@ -11,12 +11,9 @@ import com.hiroshi.cimoc.source.ComicBus;
 import com.hiroshi.cimoc.source.Dmzj;
 import com.hiroshi.cimoc.source.EHentai;
 import com.hiroshi.cimoc.source.Erocool;
-import com.hiroshi.cimoc.source.HHSSEE;
 import com.hiroshi.cimoc.source.Locality;
-import com.hiroshi.cimoc.source.MH50;
 import com.hiroshi.cimoc.source.MHRen;
 import com.hiroshi.cimoc.source.ManHuaDB;
-import com.hiroshi.cimoc.source.MangaDog;
 import com.hiroshi.cimoc.source.MangaRaw;
 import com.hiroshi.cimoc.source.Null;
 import com.hiroshi.cimoc.source.Onemh;
@@ -86,23 +83,14 @@ public class SourceManager {
                 case Dmzj.TYPE:
                     parser = new Dmzj(source);
                     break;
-                case HHSSEE.TYPE:
-                    parser = new HHSSEE(source);
-                    break;
                 case ComicBus.TYPE:
                     parser = new ComicBus(source);
                     break;
                 case MHRen.TYPE:
                     parser = new MHRen(source);
                     break;
-                case MangaDog.TYPE:
-                    parser = new MangaDog(source);
-                    break;
                 case ManHuaDB.TYPE:
                     parser = new ManHuaDB(source);
-                    break;
-                case MH50.TYPE:
-                    parser = new MH50(source);
                     break;
                 case Onemh.TYPE:
                     parser = new Onemh(source);
