@@ -81,8 +81,7 @@ public class rawqq extends MangaParser{
         String title = body.text("ul.manga-info > li:contains(Other names)");
         if (title.contains("Updating")||title.isEmpty()){
             title = body.text("ul.manga-info > h1").replace(" - RAW","").trim();
-        }
-        title = StringUtils.match(": (.*)",title,1);
+        }else title = StringUtils.match(": (.*)",title,1);
         if (title.contains(",")){
             title = title.substring(0,title.indexOf(","));
         }
