@@ -188,7 +188,9 @@ public class Dmzj extends MangaParser {
                     if (object.optInt("hidden", 1) != 1) {
                         String cid = object.getString("id");
                         String title = object.getString("name");
-                        String cover = "http://images.dmzj.com/".concat(object.getString("cover"));
+                        String cover = object.getString("cover");
+                        if (!cover.contains("http"))
+                            cover = "http://images.dmzj.com/".concat(cover);
                         Long time = object.has("last_updatetime") ? object.getLong("last_updatetime") * 1000 : null;
                         String update = time == null ? null : new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(time));
                         String author = object.optString("authors");
@@ -213,7 +215,7 @@ public class Dmzj extends MangaParser {
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("http://m.dmzj.com/classify/%s-%s-%s-%s-%s-%%d.json",
+            return StringUtils.format("https://api.m.dmzj.com/classify/%s-%s-%s-%s-%s-%%d.json",
                     args[CATEGORY_SUBJECT], args[CATEGORY_READER], args[CATEGORY_PROGRESS], args[CATEGORY_AREA], args[CATEGORY_ORDER]);
         }
 
