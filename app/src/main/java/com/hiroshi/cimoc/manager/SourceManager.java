@@ -16,7 +16,6 @@ import com.hiroshi.cimoc.source.MHRen;
 import com.hiroshi.cimoc.source.ManHuaDB;
 import com.hiroshi.cimoc.source.MangaRaw;
 import com.hiroshi.cimoc.source.Null;
-import com.hiroshi.cimoc.source.Onemh;
 import com.hiroshi.cimoc.source.manganelo;
 import com.hiroshi.cimoc.source.rawqq;
 
@@ -91,9 +90,6 @@ public class SourceManager {
                     break;
                 case ManHuaDB.TYPE:
                     parser = new ManHuaDB(source);
-                    break;
-                case Onemh.TYPE:
-                    parser = new Onemh(source);
                     break;
                 case rawqq.TYPE:
                     parser = new rawqq(source);
