@@ -11,7 +11,6 @@ import com.hiroshi.cimoc.source.MHRen;
 import com.hiroshi.cimoc.source.ManHuaDB;
 import com.hiroshi.cimoc.source.MangaRaw;
 import com.hiroshi.cimoc.source.manganelo;
-import com.hiroshi.cimoc.source.rawqq;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.List;
 
 public class UpdateHelper {
 
-    private static final int VERSION = 163;
+    private static final int VERSION = 170;
 
     public static void update(PreferenceManager manager, final DaoSession session) {
         int version = manager.getInt(PreferenceManager.PREF_APP_VERSION, 0);
@@ -38,7 +37,6 @@ public class UpdateHelper {
                 case 153:
                     session.getDatabase().execSQL("DELETE FROM SOURCE WHERE \"TYPE\" = 44");
                 case 154:
-                    session.getSourceDao().insert(rawqq.getDefaultSource());
                     session.getSourceDao().insert(MangaRaw.getDefaultSource());
                     session.getDatabase().execSQL("DELETE FROM SOURCE WHERE \"TYPE\" = 41");
                 case 158:
@@ -47,6 +45,8 @@ public class UpdateHelper {
                     session.getDatabase().execSQL("DELETE FROM SOURCE WHERE \"TYPE\" = 21");
                 case 162:
                     session.getDatabase().execSQL("DELETE FROM SOURCE WHERE \"TYPE\" = 36");
+                case 163:
+                    session.getDatabase().execSQL("DELETE FROM SOURCE WHERE \"TYPE\" = 42");
             }
             manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
         }
@@ -61,7 +61,6 @@ public class UpdateHelper {
         list.add(ComicBus.getDefaultSource());
         list.add(MHRen.Companion.getDefaultSource());
         list.add(ManHuaDB.getDefaultSource());
-        list.add(rawqq.getDefaultSource());
         list.add(MangaRaw.getDefaultSource());
         list.add(manganelo.getDefaultSource());
         list.add(Erocool.getDefaultSource());

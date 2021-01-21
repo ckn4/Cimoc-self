@@ -9,8 +9,9 @@ import com.hiroshi.cimoc.model.ImageUrl;
 import com.hiroshi.cimoc.model.Source;
 import com.hiroshi.cimoc.parser.MangaCategory;
 import com.hiroshi.cimoc.parser.MangaParser;
-import com.hiroshi.cimoc.parser.RegexIterator;
+import com.hiroshi.cimoc.parser.NodeIterator;
 import com.hiroshi.cimoc.parser.SearchIterator;
+import com.hiroshi.cimoc.soup.Node;
 import com.hiroshi.cimoc.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -26,10 +27,6 @@ import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-/**
- * Created by ZhiWen on 2019/02/25.
- */
 
 public class ComicBus extends MangaParser {
 
@@ -49,9 +46,9 @@ public class ComicBus extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
-        String url = "http://app.6comic.com:88/data/js.aspx?count=90&start=";
+        String url = "http://m.comicbus.com/data/search.aspx?k=";
         if (page == 1) {
-            keyword = URLEncoder.encode(keyword,"gb2312");
+            keyword = URLEncoder.encode(keyword,"big5");
             url = url.concat(keyword);
             return new Request.Builder().url(url).build();
         }
@@ -60,13 +57,14 @@ public class ComicBus extends MangaParser {
 
     @Override
     public SearchIterator getSearchIterator(String html, int page,String keyword) {
-        Matcher matcher = Pattern.compile("(\\d+),,.*?,.*?,([^,]+).*?\\|").matcher(html);
-        return new RegexIterator(matcher) {
+        Node body = new Node(html);
+        return new NodeIterator(body.list(".cat_list td")) {
             @Override
-            protected Comic parse(Matcher match) {
-                String cid = match.group(1);
-                String title = match.group(2);
-                String cover = "http://app.6comic.com:88/pics/0/"+match.group(1)+".jpg";
+            protected Comic parse(Node node) {
+                String cid = node.hrefWithSubString(".picborder a", 13, -6);
+                String title = node.text(".pictitle");
+                String cover = node.src(".picborder img").trim();
+                cover = "http://m.comicbus.com/"+cover;
                 return new Comic(TYPE, cid, title, cover, null, null);
             }
         };
@@ -80,7 +78,7 @@ public class ComicBus extends MangaParser {
     }
 
     @Override
-    public void parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
+    public void parseInfo(String html, Comic comic) {
         String[] result = html.split("\\|");
         String title = result[4];
         String cover = "http://app.6comic.com:88/pics/0/"+result[1]+".jpg";
@@ -99,12 +97,16 @@ public class ComicBus extends MangaParser {
         if (rresult.indexOf("|")==2){
             rresult = rresult.substring(3);
         }
-        String[] result = rresult.split("\\|");
         List<Chapter> list = new LinkedList<>();
-        for (int i=0; i<result.length; i++) {
-            String title = StringUtils.match("\\d+ (.*)",result[i],1);
-            String path = String.valueOf(i);
-            list.add(new Chapter(title, path));
+        if (rresult.contains("|")) {
+            String[] result = rresult.split("\\|");
+            for (int i = 0; i < result.length; i++) {
+                String title = StringUtils.match("\\d+ (.*)", result[i], 1);
+                String path = String.valueOf(i);
+                list.add(new Chapter(title, path));
+            }
+        }else {
+            list.add(new Chapter("为动画", ""));
         }
         Collections.reverse(list);
         return list;
@@ -131,7 +133,7 @@ public class ComicBus extends MangaParser {
         String last = r[4];
         for (int i = 0; i < pagenum; i++) {
             String last1 = last.substring(((i%100) / 10) + 3 * (i % 10), ((i%100) / 10) + 3 + 3 * (i % 10));
-            list.add(new ImageUrl(i + 1, "http://img" + imgserver + ".6comic.com:88/" + name1 + "/" + _cid + "/" + name + "/" + StringUtils.format("%03d", i + 1) + "_" + last1 + ".jpg", false));
+            list.add(new ImageUrl(i + 1, "http://img" + imgserver + ".8comic.com/" + name1 + "/" + _cid + "/" + name + "/" + StringUtils.format("%03d", i + 1) + "_" + last1 + ".jpg", false));
         }
         return list;
     }

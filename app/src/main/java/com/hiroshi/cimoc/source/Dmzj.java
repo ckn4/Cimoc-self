@@ -45,7 +45,7 @@ public class Dmzj extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) {
         if (page == 1) {
-            String url = "http://s.acg.dmzj.com/comicsum/search.php?s=".concat(keyword);
+            String url = "http://s.acg.dmzj1.com/comicsum/search.php?s=".concat(keyword);
             return new Request.Builder().url(url).build();
         }
         return null;
@@ -61,12 +61,9 @@ public class Dmzj extends MangaParser {
                     protected Comic parse(JSONObject object) {
                         try {
                             String cid = object.getString("id");
-//                        String title = object.getString("name");
                             String title = object.getString("comic_name");
                             String cover = object.getString("comic_cover");
-//                        long time = object.getLong("last_updatetime") * 1000;
-//                        String update = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(time));
-//                        String author = object.optString("authors");
+                            cover = cover.replaceAll("https:","http:");
                             String author = object.getString("comic_author");
                             return new Comic(TYPE, cid, title, cover, null, author);
                         } catch (Exception e) {
@@ -84,7 +81,8 @@ public class Dmzj extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = StringUtils.format("http://v2.api.dmzj.com/comic/%s.json", cid);
+        cid = "comic_"+cid+"_android";
+        String url = StringUtils.format("http://v3api.dmzj1.com/comic/%s.json", cid);
         return new Request.Builder().url(url).build();
     }
 
@@ -97,6 +95,7 @@ public class Dmzj extends MangaParser {
                 JSONObject object = new JSONObject(html);
                 String title = object.getString("title");
                 String cover = object.getString("cover");
+                cover = cover.replaceAll("https:","http:");
                 Long time = object.has("last_updatetime") ? object.getLong("last_updatetime") * 1000 : null;
                 String update = time == null ? null : StringUtils.getFormatTime("yyyy-MM-dd", time);
                 String intro = object.optString("description");
@@ -141,7 +140,7 @@ public class Dmzj extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("http://v2.api.dmzj.com/chapter/%s/%s.json", cid, path);
+        String url = StringUtils.format("http://v3api.dmzj1.com/chapter/%s/%s.json", cid, path);
         return new Request.Builder().url(url).build();
     }
 
@@ -190,7 +189,7 @@ public class Dmzj extends MangaParser {
                         String title = object.getString("name");
                         String cover = object.getString("cover");
                         if (!cover.contains("http"))
-                            cover = "http://images.dmzj.com/".concat(cover);
+                            cover = "http://images.dmzj1.com/".concat(cover);
                         Long time = object.has("last_updatetime") ? object.getLong("last_updatetime") * 1000 : null;
                         String update = time == null ? null : new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(time));
                         String author = object.optString("authors");
@@ -215,7 +214,7 @@ public class Dmzj extends MangaParser {
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("https://api.m.dmzj.com/classify/%s-%s-%s-%s-%s-%%d.json",
+            return StringUtils.format("http://m.dmzj1.com/classify/%s-%s-%s-%s-%s-%%d.json",
                     args[CATEGORY_SUBJECT], args[CATEGORY_READER], args[CATEGORY_PROGRESS], args[CATEGORY_AREA], args[CATEGORY_ORDER]);
         }
 
@@ -313,7 +312,7 @@ public class Dmzj extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "http://m.dmzj.com/");
+        return Headers.of("Referer", "http://m.dmzj1.com/");
     }
 
 }
