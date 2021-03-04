@@ -38,7 +38,7 @@ public class manganelo extends MangaParser{
     @Override
     public Request getSearchRequest(String keyword, int page) {
         keyword = keyword.replace(" ","_");
-        String url = StringUtils.format("https://manganelo.com/search/%s?page=%d", keyword,page);
+        String url = StringUtils.format("https://manganelo.com/search/story/%s?page=%d", keyword,page);
         return new Request.Builder()
                 .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
                 .url(url)
