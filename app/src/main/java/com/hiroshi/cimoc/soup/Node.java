@@ -45,6 +45,11 @@ public class Node {
         return new Node(get().select(cssQuery).first());
     }
 
+    public Boolean isNodeExist(String cssQuery){
+        Elements elements = element.select(cssQuery);
+        return  (elements.size()>0) ;
+    }
+
     public Node getLast(String cssQuery) {
         return new Node(get().select(cssQuery).last());
     }

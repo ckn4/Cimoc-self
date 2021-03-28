@@ -50,7 +50,10 @@ public class ComicBus extends MangaParser {
         if (page == 1) {
             keyword = URLEncoder.encode(keyword,"big5");
             url = url.concat(keyword);
-            return new Request.Builder().url(url).build();
+            return new Request.Builder().url(url)
+                    .addHeader("origin","http://m.comicbus.com")
+                    .addHeader("referer","https://m.comicbus.com/")
+                    .build();
         }
         return null;
     }
@@ -61,11 +64,14 @@ public class ComicBus extends MangaParser {
         return new NodeIterator(body.list(".cat_list td")) {
             @Override
             protected Comic parse(Node node) {
-                String cid = node.hrefWithSubString(".picborder a", 13, -6);
-                String title = node.text(".pictitle");
-                String cover = node.src(".picborder img").trim();
-                cover = "http://m.comicbus.com/"+cover;
-                return new Comic(TYPE, cid, title, cover, null, null);
+                if(node.isNodeExist(".picborder")) {
+                    String cid = node.hrefWithSubString(".picborder a", 13, -6);
+                    String title = node.text(".pictitle");
+                    String cover = node.src(".picborder img").trim();
+                    cover = "http://m.comicbus.com/" + cover;
+                    return new Comic(TYPE, cid, title, cover, null, null);
+                }
+                else return null;
             }
         };
     }
