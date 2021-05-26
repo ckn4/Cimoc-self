@@ -16,7 +16,7 @@
 
 2、dmzj不能用了
 
-3、mhren挂非日韩ip的木弟子可以搜索到隐藏漫画，请将“mangaapi.manhuaren.com”和“dm5.com”加入代理列表
+3、mhren挂非日韩ip的木弟子可以搜索到隐藏漫画，请将“mangaapi.manhuaren.com”和“dm5.com”加入代理列表(借鉴自tachiyomi
 
 4、mangaraw为日文生肉源，请使用日文搜索
 
